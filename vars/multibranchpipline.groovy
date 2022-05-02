@@ -1,7 +1,5 @@
 @Library('common-lib') _
-Package com.ram
-working = new working1
-import jenkins.model.*
+Package com.ram.working = new working1
 
 
 properties([
