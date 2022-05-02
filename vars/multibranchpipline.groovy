@@ -1,6 +1,4 @@
-@Library('Common-lib') _
-
-def multibranchpipelineJob = new com.ram.multibranchpipelineJob()
+def multibranchpipeline = new com.ram.multibranchpipelineJob()
 
 def call (){
 properties([
@@ -21,7 +19,7 @@ pipeline {
             when { expression {return params.create } }
             steps {
                 script {
-                    multibranchpipelineJob.createNewJenkinsJob("$params.projectsview", "$params.Name")
+                    multibranchpipeline.createNewJenkinsJob("$params.projectsview", "$params.Name")
                     }
                 }
             }
@@ -29,7 +27,7 @@ pipeline {
             when { expression {return params.deletejob } }
             steps {
                 script {
-                    multibranchpipelineJob.deletejob("$params.projectsview/$params.Name")
+                    multibranchpipeline.deletejob("$params.projectsview/$params.Name")
                     }
                 }
             }
