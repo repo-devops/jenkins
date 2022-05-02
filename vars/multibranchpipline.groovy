@@ -1,4 +1,4 @@
-@Library('CommonLib-Pipeline') _
+@Library('Common-lib') _
 
 def multibranchpipelineJob = new com.ram.multibranchpipelineJob()
 
