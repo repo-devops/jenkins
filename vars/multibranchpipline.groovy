@@ -1,6 +1,6 @@
 def multibranchpipeline = new com.ram.multibranchpipelineJob()
 
-
+def call (){
 properties([
     parameters([
         choice(name: 'projectsview', description: 'Please pick one', choices: ['ramkoti', 'BRESI', 'test', 'prod']),
@@ -34,3 +34,4 @@ pipeline {
 
         }
     }
+}
