@@ -1,5 +1,6 @@
 @Library('common-lib') _
-package com.ram.working = new working
+Package com.ram
+working = new working1
 import jenkins.model.*
 
 
@@ -21,7 +22,7 @@ pipeline {
             when { expression {return params.create } }
             steps {
                 script {
-                    working.createNewJenkinsJob("$params.projectsview", "$params.Name")
+                    working1.createNewJenkinsJob("$params.projectsview", "$params.Name")
                     //working.deletejob("$params.projectsview/$params.Name")
                     }
                 }
@@ -30,7 +31,7 @@ pipeline {
             when { expression {return params.deletejob } }
             steps {
                 script {
-                    //working.createNewJenkinsJob("$params.projectsview", "$params.Name")
+                    //working1.createNewJenkinsJob("$params.projectsview", "$params.Name")
                     working.deletejob("$params.projectsview/$params.Name")
                     }
                 }
