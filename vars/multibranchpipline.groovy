@@ -1,4 +1,4 @@
-@Library('jenkinslib') _
+@Library('common-lib') _
 package com.ram.working = new working
 import jenkins.model.*
 
