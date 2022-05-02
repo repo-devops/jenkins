@@ -1,5 +1,5 @@
 @Library('jenkinslib') _
-
+package com.ram.working = new working
 import jenkins.model.*
 
 
