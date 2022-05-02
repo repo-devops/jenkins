@@ -19,7 +19,6 @@ pipeline {
             when { expression {return params.create } }
             steps {
                 script {
-                    def multibranchpipeline = new com.ram.multibrach()
                     multibranchpipeline.createNewJenkinsJob("$params.projectsview", "$params.Name")
                     }
                 }
@@ -28,7 +27,6 @@ pipeline {
             when { expression {return params.deletejob } }
             steps {
                 script {
-                    def multibranchpipeline = new com.ram.multibrach()
                     multibranchpipeline.deletejob("$params.projectsview/$params.Name")
                     }
                 }
