@@ -1,4 +1,4 @@
-package com.ram
+Package com.ram
 import javaposse.jobdsl.dsl.DslFactory
 import hudson.plugins.git.*
 import hudson.*
