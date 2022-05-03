@@ -25,8 +25,8 @@ pipeline {
                     }
                 }
             }
-        stage('Delete MutiBranch pipline') {
-            when { expression {return params.deletejob } }
+          stage('Delete MutiBranch pipline') {
+              when { expression {return params.deletejob } }
             steps {
                 script {
                     multibranchPipelineJob.deletejob("$params.projectsview/$params.Name")
@@ -34,14 +34,14 @@ pipeline {
                 }
             }
 
-        }
-      stage('createNewJenkinsFolder') {
-            when { expression {return params.folder } }
-            steps {
+          stage('createNewJenkinsFolder') {
+               when { expression {return params.folder } }
+              steps {
                 script {
                     multibranchPipelineJob.createNewJenkinsFolder("$params.projectsview")
                 }
             }
         }
+      }
     }
 }
