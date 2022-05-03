@@ -10,9 +10,9 @@ def createNewJenkinsFolder(String projectsFolder) {
         projectsFolder: projectsFolder,
         // projectName: projectName
     ], scriptText: '''
-        // Get/Create the folder
         folder(projectsFolder) {
-            description("Folder for project ${projectsFolder}")
+            displayName(projectsFolder)
+            description('Folder for ${projectsFolder}')
         }
     '''
 }
