@@ -1,8 +1,8 @@
 Library('common-lib') _
 import package.com.ram.*
  
-def multibranchpipeline = new com.ram.multibranch()
-
+def multibranchpipeline = new com.bre.multibranchpipelineJob()
+ 
 def call (){
 properties([
     parameters([
