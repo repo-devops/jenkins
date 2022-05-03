@@ -1,8 +1,5 @@
 Library('common-lib') _
-import package.com.ram.*
- 
-def multibranchpipeline = new com.ram.multibranchpipelineJob()
- 
+  
 def call (){
 properties([
     parameters([
@@ -22,7 +19,7 @@ pipeline {
             when { expression {return params.create } }
             steps {
                 script {
-                    multibranchpipeline.createNewJenkinsJob("$params.projectsview", "$params.Name")
+                    multibranchPipelineJob.createNewJenkinsJob("$params.projectsview", "$params.Name")
                     }
                 }
             }
@@ -30,7 +27,7 @@ pipeline {
             when { expression {return params.deletejob } }
             steps {
                 script {
-                    multibranchpipeline.deletejob("$params.projectsview/$params.Name")
+                    multibranchPipelineJob.deletejob("$params.projectsview/$params.Name")
                     }
                 }
             }
