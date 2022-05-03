@@ -5,6 +5,18 @@ import jenkins.model.*
 import hudson.security.*
 import java.util.*
 
+def createNewJenkinsFolder(String projectsFolder) {
+    jobDsl additionalParameters: [
+        projectsFolder: projectsFolder,
+        projectName: projectName
+    ], scriptText: '''
+        // Get/Create the folder
+        folder(projectsFolder) {
+            description("Folder for project ${projectsFolder}")
+        }
+    '''
+}
+
 def createNewJenkinsJob(String projectName, String destProject) {
     jobDsl additionalParameters: [
        // projectsFolder: projectsFolder,
