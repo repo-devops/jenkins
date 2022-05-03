@@ -1,5 +1,5 @@
 @Library('comon-lib')
-def multibranchpipeline = new com.bre.multibranch()
+def multibranchpipeline = new com.ram.multibranch()
 
 def call (){
 properties([
