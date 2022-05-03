@@ -1,4 +1,6 @@
 @Library('common-lib') _
+import package.com.ram.*
+ 
 def multibranchpipeline = new com.ram.multibranch()
 
 def call (){
