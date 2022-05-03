@@ -8,7 +8,7 @@ import java.util.*
 def createNewJenkinsFolder(String projectsFolder) {
     jobDsl additionalParameters: [
         projectsFolder: projectsFolder,
-        projectName: projectName
+        // projectName: projectName
     ], scriptText: '''
         // Get/Create the folder
         folder(projectsFolder) {
