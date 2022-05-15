@@ -1,0 +1,281 @@
+@Library('CommonLib') _
+
+def multibranchpipeline = new com.rrr.multibranchpipelineJob()
+
+
+@NonCPS
+def setDescription() {
+    def item = Jenkins.instance.getItemByFullName(env.JOB_NAME)
+    item.setDescription('<!DOCTYPE html><html><body><p style="font-weight: bold; color: blue">==================================[Pipeline Description]=================================</p>This pipeline Creates & Delete Github repository:<ul><li>Creates MultiBranch pipeline in jenkins</li></ul><p style="font-weight: bold; color: blue">==================================[End of Description]===================================</p></body></html>')
+    item.save()
+}
+setDescription()
+
+
+pipeline {
+    agent any
+    }
+    options {
+      preserveStashes()
+      timestamps()
+      ansiColor('xterm')
+    }
+
+    parameters {
+    booleanParam(defaultValue: true, description: 'Uncheck if you do not want to create a GitHub repository', name: 'Create Repository')
+    booleanParam(defaultValue: false, description: 'Select only if you want to delete GitHub repository', name: 'Delete Repository')
+    string(name: 'Application_Name', description: 'Name of the application, max character length is TBD.')
+    validatingString(name: 'Org_name' , description: 'Name of the Organization', defaultValue: 'rrr-org', failedValidationMessage: 'Cannot create repository outside rrr-org space', regex: 'rrr-org')
+    choice(name: 'Team_Name', description: 'Please pick one', choices: ['rrrP-rrrf', 'rrrP-Cm', 'rrrP-Core', 'rrrP-Cr', 'rrrP-DevOps', 'rrrP-Evd', 'rrrSI', 'rrrCM', 'rrrP-ioT', 'rrrP-Menu', 'rrrP-Qe', 'rrrP-Services', 'rrrP-SI', 'rrrP-Sre', 'rrrP-TechLabs', 'rrrP-Terraform-Modules', 'rrrP-Terrafrom', 'rrrP-Avengers'])
+    choice(name: 'JenkinsView', description: 'Please pick one', choices: ['AC Projects', 'Admin','rrr Projects','rrrCM Projects', 'rrrD Projects', 'rrrF Projects','rrrS12', 'rrrSI Projects', 'EVD Projects', 'IOT Projects', 'MENU Projects', 'QE Projects', 'SRE Projects','SVCS Projects', 'TEST Projects', 'TFM Projects', 'TF Projects', 'TL Projects'])
+    choice(name: 'Build_Type', choices: ['nobuild', 'ansible', 'docker', 'helm', 'lambda', 'terraform', 'terraform-module', 'npm-module', 'OpenTestSelenium', 'OpenTestUI', 'jarmenu']) //New build-type added
+  }
+
+  
+  stages {
+    stage ('Pre-check') {
+      steps {
+        script {
+          if (params['Create Repository'] == true && params['Delete Repository'] == true) {
+            error("Pipeline aborted due invalid parameter selection, select either Create or Delete repository from chackbox")
+          }
+          else if (params['Create Repository'] == false && params['Delete Repository'] == false) {
+            error("Pipeline aborted due invalid parameter selection, both Create & Delete repository cannot be left blank")
+          }
+        }
+      }
+    }
+    stage('Create new repository in GitHub') {
+      when {
+        expression { params['Create Repository'] == true }
+      }
+      steps {
+        container ('build-tools') {
+          script {
+            withCredentials([string(credentialsId: 'GithubPAT', variable: 'GHPAT')]) {
+              def lc_teamName = params['Team_Name'].toLowerCase()
+              sh """
+                echo ${GHPAT} | gh auth login --with-token
+                gh auth status
+                #lc_teamName=\$(echo ${Team_Name} | tr [:upper:] [:lower:])
+                gh repo create ${Org_name}/${lc_teamName}-${Application_Name}-${Build_Type} --private --team ${Team_Name}
+                echo Successfully created repository ${lc_teamName}-${Application_Name}-${Build_Type} in GitHub
+              """
+            }
+          }
+        }
+      }
+    }
+
+    stage('Clone Source Repo') {
+      when {
+        expression { params['Create Repository'] == true }
+      }
+      steps {
+        withCredentials([usernamePassword(credentialsId: '6532e3ff-1c9c-46f6-9d3d-5a1505c41cf9',
+        passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
+          container ('build-tools') {
+            script {
+              if (params['Build_Type'] == 'nobuild') {
+                def lc_teamName = params['Team_Name'].toLowerCase()
+                dir ("${workspace}") {
+                  sh """
+                    set -e
+                    git clone 'https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/${Org_name}/rrr-sample-nobuild.git'
+                    ls -al
+                    cd rrr-sample-nobuild
+                    rm -rf .git
+                    git init
+                    git config user.name "rrr-Jenkins"
+                    git config user.email testemail@company.com
+                    git add -A .
+                    git commit -m "Initial check-in from template"
+                    git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/${Org_name}/${lc_teamName}-${Application_name}-${Build_Type}.git master
+                  """
+                }
+              }
+              else if (params['Build_Type'] == 'helm') {
+                def lc_teamName = params['Team_Name'].toLowerCase()
+                dir ("${workspace}") {
+                sh """
+                  set -e
+                  git clone 'https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/${Org_name}/rrr-sample-helm.git'
+                  ls -al
+                  cd rrr-sample-helm
+                  rm -rf .git
+                  git init
+                  git config user.name "rrr-Jenkins"
+                  git config user.email testemail@company.com
+                  git add -A .
+                  git commit -m "Initial check-in from template"
+                  git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/${Org_name}/${lc_teamName}-${Application_Name}-${Build_Type}.git master
+                """
+              }
+            }
+
+            else if (params['Build_Type'] == 'docker') {
+              def lc_teamName = params['Team_Name'].toLowerCase()
+              dir ("${workspace}") {
+                sh """
+                  set -e
+                  git clone 'https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/${Org_name}/rrr-sample-docker' 
+                  ls -al
+                  cd rrr-sample-docker
+                  rm -rf .git
+                  git init
+                  git config user.name "rrr-Jenkins"
+                  git config user.email testemail@company.com
+                  git add -A .
+                  git commit -m "Initial check-in from template"
+                  git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/${Org_name}/${lc_teamName}-${Application_name}-${Build_Type}.git master
+                  """  
+                }
+              }
+              
+              else if (params['Build_Type'] == 'lambda' || params['Build_Type'] == 'terraform' || params['Build_Type'] == 'terraform-module') { 
+                def lc_teamName = params['Team_Name'].toLowerCase()
+                dir ("${workspace}") {
+                  sh """
+                    set -e
+                    git clone 'https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/${Org_name}/rrr-sample-terraform'
+                    ls -al
+                    cd rrr-sample-terraform
+                    rm -rf .git
+                    git init
+                    git config user.name "rrr-Jenkins"
+                    git config user.email testemail@company.com
+                    git add -A .
+                    git commit -m "Initial check-in from template"
+                    git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/${Org_name}/${lc_teamName}-${Application_Name}-${Build_Type}.git master
+                  """
+                }
+              }
+              
+              else if (params['Build_Type'] == 'npm-module') {
+                def lc_teamName = params['Team_Name'].toLowerCase()
+                dir ("${workspace}") {
+                  sh """
+                    set -e
+                    git clone 'https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/${Org_name}/rrr-sample-npm-module'
+                    ls -al
+                    cd rrr-sample-npm-module
+                    rm -rf .git
+                    git init
+                    git config user.name "rrr-Jenkins"
+                    git config user.email testemail@company.com
+                    git add -A .
+                    git commit -m "Initial check-in from template"
+                    git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/${Org_name}/${lc_teamName}-${Application_Name}-${Build_Type}.git master
+                  """
+                }
+              }
+              
+              else if (params['Build_Type'] == 'OpenTestSelenium') {
+                def lc_teamName = params['Team_Name'].toLowerCase()
+                dir ("${workspace}") {
+                  sh """
+                    set -e
+                    git clone 'https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/${Org_name}/rrr-sample-opentestselenium'
+                    ls -al
+                    cd rrr-sample-opentestselenium
+                    rm -rf .git
+                    git init
+                    git config user.name "rrr-Jenkins"
+                    git config user.email testemail@company.com
+                    git add -A .
+                    git commit -m "Initial check-in from template"
+                    git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/${Org_name}/${lc_teamName}-${Application_Name}-${Build_Type}.git master
+                  """
+                }
+              }
+              
+              else if (params['Build_Type'] == 'OpenTestUI') {
+                def lc_teamName = params['Team_Name'].toLowerCase()
+                dir ("${workspace}") {
+                  sh """
+                    set -e
+                    git clone 'https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/${Org_name}/rrr-sample-opentestui'
+                    ls -al
+                    cd rrr-sample-opentestui
+                    rm -rf .git
+                    git init
+                    git config user.name "rrr-Jenkins"
+                    git config user.email testemail@company.com
+                    git add -A .
+                    git commit -m "Initial check-in from template"
+                    git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/${Org_name}/${lc_teamName}-${Application_Name}-${Build_Type}.git master
+                  """
+                }
+              }
+              
+              else if (params['Build_Type'] == 'jarmenu') {
+                def lc_teamName = params['Team_Name'].toLowerCase()
+                dir ("${workspace}") {
+                  sh """
+                    set -e
+                    git clone 'https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/${Org_name}/rrr-sample-jarmenu'
+                    ls -al
+                    cd rrr-sample-jarmenu
+                    rm -rf .git
+                    git init
+                    git config user.name "rrr-Jenkins"
+                    git config user.email testemail@company.com
+                    git add -A .
+                    git commit -m "Initial check-in from template"
+                    git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/${Org_name}/${lc_teamName}-${Application_Name}-${Build_Type}.git master
+                  """
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    
+    stage('Delete repository From Github') {
+      when {
+        expression { params['Delete Repository'] == true }
+      }
+      steps {
+        container('build-tools') {
+          script {
+            withCredentials([string(credentialsId: 'GithubPAT', variable: 'GHPAT')]) {
+              def lc_teamName = params['Team_Name'].toLowerCase()
+              sh """
+              echo ${GHPAT} | gh auth login --with-token
+              gh auth status
+              gh repo delete ${Org_name}/${lc_teamName}-${Application_Name}-${Build_Type} --confirm
+              echo Successfully deleted repository ${Org_name}/${lc_teamName}-${Application_Name}-${Build_Type} in GitHub
+              """
+            }
+          }
+        }
+      }
+    }
+    
+    stage('Create Multibranch Pipeline') {
+      when {
+        expression { params['Build_Type'] != 'nobuild' && params['Create Repository'] == true}
+      }
+      steps {
+        container('build-tools') {
+          script {
+            multibranchpipeline.createNewMultibranchPipelineJob("${JenkinsView}","${Team_Name.toLowerCase()}-${Application_Name}-${Build_Type}")
+          }
+        }
+      }
+    }  
+    stage('Delete Multibranch Pipeline') {
+      when {
+        expression { params['Build_Type'] != 'nobuild' && params['Delete Repository'] == true}
+      }
+      steps {
+        container('build-tools') {
+          script {
+            multibranchpipeline.deletejob("${JenkinsView}/${Team_Name.toLowerCase()}-${Application_Name}-${Build_Type}")
+          }
+        }
+      }
+    }
+  }
+}
