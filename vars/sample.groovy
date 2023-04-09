@@ -1,4 +1,4 @@
-Library('common-lib') _
+
   
 def call (){
 properties([
